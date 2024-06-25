@@ -41,20 +41,22 @@ class MessageBubble(QWidget):
         super(MessageBubble, self).__init__(parent)
         self.initUI(text, avatar_path, is_sender)
 
-    def initUI(self, text, avatar_path, is_sender):
+    def initUI(self, text:str, avatar_path:str, is_sender:bool):
         self.bubble_container = QWidget(self)  # 气泡容器
         bubble_layout = QHBoxLayout(self.bubble_container)  # 气泡内部水平布局
         # 文本容器QWidget
         self.text_container = QWidget(self.bubble_container)
         text_layout = QVBoxLayout(self.text_container)
         text_layout.setContentsMargins(0, 0, 0, 0)  # 设置文本容器的边距
+        text=self.text_line_break(text)
+        print(text)
         self.text_label = QLabel(text, self.text_container)
         self.text_label.setWordWrap(True)
         text_layout.addWidget(self.text_label)
         # 设置高度
         self.text_container.setMinimumHeight(50)
-        self.text_container.setMaximumHeight(self.text_label.height())
-        self.setMaximumHeight(self.text_container.height() + 200)
+        # self.text_container.setMaximumHeight(self.text_label.height())
+        # self.setMaximumHeight(self.text_container.height() + 200)
         # 把字体设置成微雅软黑
         font = QFont('Microsoft YaHei', 12)  # 12是字体大小，可以根据需要调整
         self.text_label.setFont(font)
@@ -113,6 +115,12 @@ class MessageBubble(QWidget):
         else:
             main_layout.addWidget(self.bubble_container, alignment=Qt.AlignLeft)
 
+    @staticmethod
+    def text_line_break(s: str, limit: int = 15) -> str:
+        lines = []
+        for i in range(0, len(s), limit):
+            lines.append(s[i:i + limit])
+        return '\n'.join(lines)
 
 class MessageBubbleWindow(QListWidget):
     """测试用"""
@@ -124,7 +132,7 @@ class MessageBubbleWindow(QListWidget):
     def initUI(self):
         self.setWindowTitle('Message Bubble Example')
         self.setGeometry(300, 300, 400, 300)  # 设置窗口位置和大小
-        text = "Hello"
+        text = "Hellohhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
         is_sender = True  # 假设总是发送者
         avatar_path = "../Assets/image/logo.png"  # 发送者头像路径
         bubble = MessageBubble(text, avatar_path, is_sender=is_sender)
@@ -136,6 +144,7 @@ class MessageBubbleWindow(QListWidget):
         self.setItemWidget(item, bubble)
 
         self.show()
+
 
 
 if __name__ == '__main__':
