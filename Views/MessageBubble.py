@@ -7,7 +7,9 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtGui import QPixmap, QRegion
 from PyQt5.QtCore import Qt
-from qfluentwidgets import AvatarWidget
+from qfluentwidgets import AvatarWidget, ImageLabel
+
+
 class AvatarContainer(QFrame):
     """
     聊天头像样式
@@ -37,54 +39,67 @@ class MessageBubble(QWidget):
     消息气泡
     """
 
-    def __init__(self, text: str, avatar_path: str, is_sender: bool = True, parent=None):
+    def __init__(self, text: str, avatar_path: str, is_sender: bool = True, parent=None, variety:str= "text"):
+        """
+        :param text:聊天文本
+        :param avatar_path:头像路径
+        :param is_sender:是否是发送者
+        :param variety:种类，分text、image、audio三种吧
+        """
         super(MessageBubble, self).__init__(parent)
-        self.initUI(text, avatar_path, is_sender)
+        self.initUI(text, avatar_path, is_sender,variety)
 
-    def initUI(self, text:str, avatar_path:str, is_sender:bool):
+    def initUI(self, text:str, avatar_path:str, is_sender:bool,variety):
         self.bubble_container = QWidget(self)  # 气泡容器
         bubble_layout = QHBoxLayout(self.bubble_container)  # 气泡内部水平布局
-        # 文本容器QWidget
-        self.text_container = QWidget(self.bubble_container)
-        text_layout = QVBoxLayout(self.text_container)
-        text_layout.setContentsMargins(0, 0, 0, 0)  # 设置文本容器的边距
-        text=self.text_line_break(text)
-        print(text)
-        self.text_label = QLabel(text, self.text_container)
-        self.text_label.setWordWrap(True)
-        text_layout.addWidget(self.text_label)
-        # 设置高度
-        self.text_container.setMinimumHeight(50)
-        # self.text_container.setMaximumHeight(self.text_label.height())
-        # self.setMaximumHeight(self.text_container.height() + 200)
-        # 把字体设置成微雅软黑
-        font = QFont('Microsoft YaHei', 12)  # 12是字体大小，可以根据需要调整
-        self.text_label.setFont(font)
-        # 为文本容器设置背景色
-        #      背景色
-        #    #ffe4e1粉色，#e5f9e7绿色，#e0f2ff蓝色,#dbc6e0
 
-        self.text_container.setStyleSheet("""  
-            QWidget {  
-                background-color:#e6e6fa;             /* 背景色 */  
-                border-radius: 10px;                   /* 圆角 */  
-               box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影 */
-            }  
-            QLabel {                                  /* 假设文本容器中包含QLabel */  
-                font-size: 14px;                       /* 字体大小 */  
-                color: #333;                           /* 字体颜色 */
-            }  
-            QWidget:hover {                            /* 鼠标悬停效果 */  
-                background-color: #dbc6e0;             /* 悬停时背景色变化 */  
-            }  
-        """)
+        self.info_container = QWidget(self.bubble_container)
+        # 设置高度
+        self.info_container.setMinimumHeight(50)
+        # self.info_container.setMaximumHeight(self.text_label.height())
+        # self.setMaximumHeight(self.info_container.height() + 200)
+        self.info_container.setStyleSheet("""  
+                        QWidget {  
+                            background-color:#e6e6fa;             /* 背景色 */  
+                            border-radius: 10px;                   /* 圆角 */  
+                           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影 */
+                        }  
+                        QLabel {                                  /* 假设文本容器中包含QLabel */  
+                            font-size: 14px;                       /* 字体大小 */  
+                            color: #333;                           /* 字体颜色 */
+                        }  
+                        QWidget:hover {                            /* 鼠标悬停效果 */  
+                            background-color: #dbc6e0;             /* 悬停时背景色变化 */  
+                        }  
+                    """)
+
+        text_layout = QVBoxLayout(self.info_container)
+        text_layout.setContentsMargins(0, 0, 0, 0)  # 设置文本容器的边距
+        # 文本容器QWidget
+        if variety == "text":
+            text=self.text_line_break(text)
+            print(text)
+            self.text_label = QLabel(text, self.info_container)
+            self.text_label.setWordWrap(True)
+            text_layout.addWidget(self.text_label)
+            # 把字体设置成微雅软黑
+            font = QFont('Microsoft YaHei', 12)  # 12是字体大小，可以根据需要调整
+            self.text_label.setFont(font)
+            # 为文本容器设置背景色
+            #      背景色
+            #    #ffe4e1粉色，#e5f9e7绿色，#e0f2ff蓝色,#dbc6e0
+        elif variety == "image":
+            image = ImageLabel(text)
+            image.scaledToHeight(200)
+            image.setBorderRadius(8, 8, 8, 8)
+            text_layout.addWidget(image)
 
         # 头像QLabel
         self.avatar_container = AvatarContainer(avatar_path)
 
         # 设置气泡容器的样式
         if is_sender:
-            bubble_layout.addWidget(self.text_container, stretch=1)
+            bubble_layout.addWidget(self.info_container, stretch=1)
             bubble_layout.addWidget(self.avatar_container)
 
             bubble_style = """  
@@ -96,9 +111,9 @@ class MessageBubble(QWidget):
             """
         else:
             bubble_layout.addWidget(self.avatar_container)
-            bubble_layout.addWidget(self.text_container, stretch=1)
+            bubble_layout.addWidget(self.info_container, stretch=1)
             bubble_style = """  
-                QWidget {  
+                QWidget {
                     background-color: rgba(255, 255, 255, 0);  
                     border-radius: 10px 10px 0 10px;  
                     padding: 10px;  

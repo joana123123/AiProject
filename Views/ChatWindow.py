@@ -11,8 +11,11 @@ from qfluentwidgets import ToolTipFilter, PushButton, Icon, FluentIcon, ToolTipP
     SubtitleLabel, ListWidget, PlainTextEdit
 
 from Views.GlobalSignal import global_signal
+from Views.FileWindow import FileWindow
 from PyQt5.QtGui import QPixmap
 
+from Views.MessageBubble import MessageBubble
+# from Tests.flask_test import FlaskTest
 
 
 class ChatSearchWindow(QWidget):
@@ -132,82 +135,83 @@ class AvatarContainer(QFrame):
         # 如果需要，可以设置头像容器的边框和背景
         # self.setStyleSheet("QFrame { border: 1px solid #ccc; background-color: #f0f0f0; }")
 
-class MessageBubble(QWidget):
-    '''消息气泡'''
-    def __init__(self, text, avatar_path, is_sender=True, parent=None):
-        super(MessageBubble, self).__init__(parent)
-        self.initUI(text, avatar_path, is_sender)
 
-    def initUI(self, text, avatar_path, is_sender):
-        self.bubble_container = QWidget(self)  # 气泡容器
-        bubble_layout = QHBoxLayout(self.bubble_container)  # 气泡内部水平布局
-        # 文本容器QWidget
-        self.text_container = QWidget(self.bubble_container)
-        text_layout = QVBoxLayout(self.text_container)
-        text_layout.setContentsMargins(0, 0, 0, 0)  # 设置文本容器的边距
-        self.text_label = QLabel(text, self.text_container)
-        self.text_label.setWordWrap(True)
-        text_layout.addWidget(self.text_label)
-        # 为文本容器设置背景色
-        self.text_container.setStyleSheet("""  
-            QWidget {  
-                background-color:#e6e6fa;             /* 背景色 */  
-                border-radius: 10px;                   /* 圆角 */  
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影 */  
-            }  
-            QLabel {                                  /* 假设文本容器中包含QLabel */  
-                font-size: 14px;                       /* 字体大小 */  
-                color: #333;                           /* 字体颜色 */  
-            }  
-            QWidget:hover {                            /* 鼠标悬停效果 */  
-                background-color: #dbc6e0;             /* 悬停时背景色变化 */  
-            }  
-
-            /* 背景色 */  
-            #ffe4e1粉色，#e5f9e7绿色，#e0f2ff蓝色
-            }  
-        """)
-        # 头像QLabel
-        self.avatar_container = AvatarContainer(avatar_path, self)
-
-        # self.avatar_label = QLabel(self.bubble_container)
-        # avatar_pixmap = QPixmap(avatar_path).scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        # self.avatar_label.setPixmap(avatar_pixmap)
-        # 设置头像背景（如果需要的话，通常是透明的，因为直接使用QPixmap）
-        # self.avatar_label.setStyleSheet("QLabel { background-color: transparent; border: none; }")
-
-        # 设置气泡容器的样式
-        if is_sender:
-            bubble_layout.addWidget(self.text_container, stretch=1)
-            bubble_layout.addWidget(self.avatar_container)
-
-            bubble_style = """  
-                QWidget {  
-                    background-color:rgba(255, 255, 255, 0);  
-                    border-radius: 10px 10px 10px 0;  
-                    padding: 10px;  
-                }  
-            """
-        else:
-            bubble_layout.addWidget(self.avatar_container)
-            bubble_layout.addWidget(self.text_container, stretch=1)
-            bubble_style = """  
-                QWidget {  
-                    background-color: rgba(255, 255, 255, 0);  
-                    border-radius: 10px 10px 0 10px;  
-                    padding: 10px;  
-                }  
-            """
-        self.bubble_container.setStyleSheet(bubble_style)
-
-        # 主布局（可以是垂直布局，用于堆叠多个气泡）
-        main_layout = QVBoxLayout(self)
-
-        # 根据发送者或接收者设置气泡容器的位置
-        if is_sender:
-            main_layout.addWidget(self.bubble_container, alignment=Qt.AlignRight)
-        else:
-            main_layout.addWidget(self.bubble_container, alignment=Qt.AlignLeft)
+# class MessageBubble(QWidget):
+#     '''消息气泡'''
+#     def __init__(self, text, avatar_path, is_sender=True, parent=None):
+#         super(MessageBubble, self).__init__(parent)
+#         self.initUI(text, avatar_path, is_sender)
+#
+#     def initUI(self, text, avatar_path, is_sender):
+#         self.bubble_container = QWidget(self)  # 气泡容器
+#         bubble_layout = QHBoxLayout(self.bubble_container)  # 气泡内部水平布局
+#         # 文本容器QWidget
+#         self.text_container = QWidget(self.bubble_container)
+#         text_layout = QVBoxLayout(self.text_container)
+#         text_layout.setContentsMargins(0, 0, 0, 0)  # 设置文本容器的边距
+#         self.text_label = QLabel(text, self.text_container)
+#         self.text_label.setWordWrap(True)
+#         text_layout.addWidget(self.text_label)
+#         # 为文本容器设置背景色
+#         self.text_container.setStyleSheet("""
+#             QWidget {
+#                 background-color:#e6e6fa;             /* 背景色 */
+#                 border-radius: 10px;                   /* 圆角 */
+#                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影 */
+#             }
+#             QLabel {                                  /* 假设文本容器中包含QLabel */
+#                 font-size: 14px;                       /* 字体大小 */
+#                 color: #333;                           /* 字体颜色 */
+#             }
+#             QWidget:hover {                            /* 鼠标悬停效果 */
+#                 background-color: #dbc6e0;             /* 悬停时背景色变化 */
+#             }
+#
+#             /* 背景色 */
+#             #ffe4e1粉色，#e5f9e7绿色，#e0f2ff蓝色
+#             }
+#         """)
+#         # 头像QLabel
+#         self.avatar_container = AvatarContainer(avatar_path, self)
+#
+#         # self.avatar_label = QLabel(self.bubble_container)
+#         # avatar_pixmap = QPixmap(avatar_path).scaled(50, 50, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+#         # self.avatar_label.setPixmap(avatar_pixmap)
+#         # 设置头像背景（如果需要的话，通常是透明的，因为直接使用QPixmap）
+#         # self.avatar_label.setStyleSheet("QLabel { background-color: transparent; border: none; }")
+#
+#         # 设置气泡容器的样式
+#         if is_sender:
+#             bubble_layout.addWidget(self.text_container, stretch=1)
+#             bubble_layout.addWidget(self.avatar_container)
+#
+#             bubble_style = """
+#                 QWidget {
+#                     background-color:rgba(255, 255, 255, 0);
+#                     border-radius: 10px 10px 10px 0;
+#                     padding: 10px;
+#                 }
+#             """
+#         else:
+#             bubble_layout.addWidget(self.avatar_container)
+#             bubble_layout.addWidget(self.text_container, stretch=1)
+#             bubble_style = """
+#                 QWidget {
+#                     background-color: rgba(255, 255, 255, 0);
+#                     border-radius: 10px 10px 0 10px;
+#                     padding: 10px;
+#                 }
+#             """
+#         self.bubble_container.setStyleSheet(bubble_style)
+#
+#         # 主布局（可以是垂直布局，用于堆叠多个气泡）
+#         main_layout = QVBoxLayout(self)
+#
+#         # 根据发送者或接收者设置气泡容器的位置
+#         if is_sender:
+#             main_layout.addWidget(self.bubble_container, alignment=Qt.AlignRight)
+#         else:
+#             main_layout.addWidget(self.bubble_container, alignment=Qt.AlignLeft)
 
 
 
@@ -277,7 +281,7 @@ class ChatSessionWindow(QWidget):
 
 
 
-    def send_button_clicked(self):
+    def send_button_clicked(self,):
         '''
             获取 PlainTextEdit 控件中的文本并发送聊天气泡
         '''
@@ -320,7 +324,25 @@ class ChatSessionWindow(QWidget):
 
         :return:
         """
-        ...
+        file_window=FileWindow()
+        img_path = file_window.open_file_dialog()
+        if img_path is None or "":
+            print("未选中图片")
+        else:
+            print("yes选中了", img_path)
+            is_sender = True  # 假设总是发送者
+            avatar_path = "../Assets/image/logo.png"  # 发送者头像路径
+            bubble = MessageBubble(img_path, avatar_path, is_sender=is_sender, variety="image")
+            # 创建一个 QListWidgetItem 并设置其大小提示
+            item = QListWidgetItem(self.ListWidget)
+            item.setSizeHint(bubble.sizeHint())
+            # 将 MessageBubble 设置为 QListWidgetItem 的 widget
+            self.ListWidget.setItemWidget(item, bubble)
+            # 滚动到底部以显示最新消息（可选）
+            self.ListWidget.scrollToBottom()
+            
+
+
 
     def upload_audio(self) -> None:
         """
