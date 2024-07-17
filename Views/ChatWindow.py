@@ -5,18 +5,22 @@ Time 2024/6/14
 Misaka-xxw: 记得改打开文件的路径为Aiproject！
 """
 import sys
+import requests
+import json
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QAction, QLabel, QHBoxLayout, QListWidgetItem, QFrame, QApplication
 from PyQt5.uic import loadUi
 from qfluentwidgets import ToolTipFilter, PushButton, Icon, FluentIcon, ToolTipPosition, CommandBar, MessageBoxBase, \
-    SubtitleLabel, ListWidget, PlainTextEdit, SearchLineEdit, MessageBox
+    SubtitleLabel, ListWidget, PlainTextEdit, SearchLineEdit, MessageBox, Icon, InfoBar, InfoBarPosition
 
 from Views.FileWindow import FileWindow
 from Views.GlobalSignal import global_signal
 from Views.MessageBubble import MessageBubble
 from Sqlite.ChatSql import ChatSql
 from Core.Tools.AudioRecorder import AudioRecorder
+from Sqlite.Static import static
+
 
 class ChatLineWidget(QWidget):
     """
@@ -357,6 +361,8 @@ class ChatSessionWindow(QWidget):
             item.setSizeHint(bubble.sizeHint())
             # 将 MessageBubble 设置为 QListWidgetItem 的 widget
             self.ListWidget.setItemWidget(item, bubble)
+            # 接口函数
+            self.img_text(img_path)
             # 滚动到底部以显示最新消息（可选）
             self.ListWidget.scrollToBottom()
 
@@ -382,6 +388,78 @@ class ChatSessionWindow(QWidget):
         self.ListWidget.setItemWidget(item, bubble)
         # 滚动到底部以显示最新消息（可选）
         self.ListWidget.scrollToBottom()
+
+    def img_text(self, path: str):
+        """
+        图片转文字
+        """
+        img_api: str = r"http://47.121.115.252:8193/PictureToTextModel/chat"
+        uuid = static.uuid
+        user_name = static.username
+        print(user_name, uuid)
+        if uuid == 0 or user_name == '未登录':
+            # print("!")
+            InfoBar.error(
+                title="图转文",
+                content="请先登录",
+                orient=Qt.Vertical,
+                isClosable=True,
+                position=InfoBarPosition.BOTTOM_RIGHT,
+                duration=1000,
+                parent=self
+            )
+        else:
+            for i in range(2):
+                try:
+                    # print("?")
+                    r = requests.post(url=img_api,
+                                      headers={
+                                          "uuid": uuid,
+                                          "username": user_name,
+                                          "Content-Type": "application/json"
+                                      },
+                                      data=json.dumps({path}))
+                    print("r.status_code", r.status_code)
+                    if r.status_code == 200:
+                        response_data = r.json()
+                        code = response_data.get("code", None)
+                        text = response_data.get("content", None)
+                        if code != 0:
+                            InfoBar.error(
+                                title="图转文",
+                                content="code不为0",
+                                orient=Qt.Vertical,
+                                isClosable=True,
+                                position=InfoBarPosition.BOTTOM_RIGHT,
+                                duration=1000,
+                                parent=self
+                            )
+                        else:
+                            ai_avatar_path = '../Assets/image/logo.png'
+                            is_sender = False
+                            bubble = MessageBubble(text, ai_avatar_path, is_sender=is_sender, variety="text")
+                            # 创建一个 QListWidgetItem 并设置其大小提示
+                            item = QListWidgetItem(self.ListWidget)
+                            item.setSizeHint(bubble.sizeHint())
+                            # 将 MessageBubble 设置为 QListWidgetItem 的 widget
+                            self.ListWidget.setItemWidget(item, bubble)
+                            print(text)
+                        break  # 如果成功，跳出循环
+                    else:
+                        InfoBar.error(
+                            title="图转文",
+                            content=f"网络异常 {r.status_code}",
+                            orient=Qt.Vertical,
+                            isClosable=True,
+                            position=InfoBarPosition.BOTTOM_RIGHT,
+                            duration=1000,
+                            parent=self
+                        )
+                except requests.RequestException as e:
+                    print(f"请求错误: {e}")
+                    if i == 1:  # 如果第二次也失败了，可以考虑抛出异常或进行其他处理
+                        raise
+
 
 class AudioChoiceWindow(MessageBoxBase):
     """
@@ -424,6 +502,7 @@ class AudioChoiceWindow(MessageBoxBase):
         if self.AudioWindow.path is not None:
             print("yes选中了")
             global_signal.audio_submitted.emit(self.AudioWindow.path)
+
 
 if __name__ == "__main__":
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
