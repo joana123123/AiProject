@@ -1,16 +1,8 @@
 from qfluentwidgets import PushButton, ToolTipFilter, ToolTipPosition, MessageBoxBase, \
     LineEdit, PlainTextEdit, ListWidget, SearchLineEdit, MessageBox, FlowLayout
-from qfluentwidgets import FluentIcon
-import sys
-from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtWidgets import QHBoxLayout, QListWidgetItem
-from PyQt5.uic import loadUi
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtWidgets import QApplication
 from qfluentwidgets import PushButton, ToolTipFilter, ToolTipPosition, MessageBoxBase, \
     LineEdit, PlainTextEdit, ListWidget, SearchLineEdit, MessageBox
 from qfluentwidgets import FluentIcon
-from AiProject2.AiProject.Views.GlobalSignal import global_signal
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QApplication, QPushButton
 
