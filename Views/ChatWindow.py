@@ -7,9 +7,7 @@ Misaka-xxw: 记得改打开文件的路径为Aiproject！
 import json
 import sys
 
-
 import requests
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QAction, QLabel, QHBoxLayout, QListWidgetItem, QFrame, QApplication
