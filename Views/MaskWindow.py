@@ -190,9 +190,9 @@ class MaskSettingWindow(QWidget):
         name = data.get('name')
         icon = data.get('icon')
         des = data.get('des')
-        print(name, icon, des)
+        # print(name, icon, des)
         # 更新本地数据库
-        # self.sql.add_mask(name, des, icon)
+        self.sql.add_mask(name, des, icon)
         # 发送全局信号
         global_signal.ChatOperation.emit("close_login_success")
         item = QListWidgetItem(self.mask_info)
