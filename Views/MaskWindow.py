@@ -58,9 +58,9 @@ class MaskSubSettingWindow(MessageBoxBase):
 
 
 class MaskWidget(QWidget):
-    '''
+    """
     每行面具样式
-    '''
+    """
 
     def __init__(self, text, icon, parent=None):
         super(MaskWidget, self).__init__(parent)
