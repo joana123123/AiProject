@@ -361,7 +361,7 @@ class ChatSessionWindow(QWidget):
             item.setSizeHint(bubble.sizeHint())
             # 将 MessageBubble 设置为 QListWidgetItem 的 widget
             self.ListWidget.setItemWidget(item, bubble)
-            # 接口函数
+            # 接口函数实现图片转文字
             self.img_text(img_path)
             # 滚动到底部以显示最新消息（可选）
             self.ListWidget.scrollToBottom()
@@ -374,6 +374,7 @@ class ChatSessionWindow(QWidget):
         """
         global_signal.audio_submitted.connect(self.send_audio_message)
         AudioChoiceWindow(self).exec()
+
 
     def send_audio_message(self, audio_path: str) -> None:
         print("send_audio")
@@ -388,6 +389,9 @@ class ChatSessionWindow(QWidget):
         self.ListWidget.setItemWidget(item, bubble)
         # 滚动到底部以显示最新消息（可选）
         self.ListWidget.scrollToBottom()
+        # 语音转文字函数
+        self.audio_text(audio_path)
+
 
     def img_text(self, path: str):
         """
@@ -411,23 +415,27 @@ class ChatSessionWindow(QWidget):
         else:
             for i in range(2):
                 try:
-                    # print("?")
+                    # print(path)
                     r = requests.post(url=img_api,
                                       headers={
                                           "uuid": uuid,
                                           "username": user_name,
-                                          "Content-Type": "application/json"
                                       },
-                                      data=json.dumps({path}))
+                                      files={
+                                          "file": open(path, "rb")
+                                      })
                     print("r.status_code", r.status_code)
+                    # print(requests.json())
                     if r.status_code == 200:
                         response_data = r.json()
                         code = response_data.get("code", None)
                         text = response_data.get("content", None)
+                        print(code, text)
+
                         if code != 0:
                             InfoBar.error(
                                 title="图转文",
-                                content="code不为0",
+                                content="识别失败",
                                 orient=Qt.Vertical,
                                 isClosable=True,
                                 position=InfoBarPosition.BOTTOM_RIGHT,
@@ -448,6 +456,76 @@ class ChatSessionWindow(QWidget):
                     else:
                         InfoBar.error(
                             title="图转文",
+                            content=f"网络异常 {r.status_code}",
+                            orient=Qt.Vertical,
+                            isClosable=True,
+                            position=InfoBarPosition.BOTTOM_RIGHT,
+                            duration=1000,
+                            parent=self
+                        )
+                except requests.RequestException as e:
+                    print(f"请求错误: {e}")
+                    if i == 1:  # 如果第二次也失败了，可以考虑抛出异常或进行其他处理
+                        raise
+
+    def audio_text(self, path: str):
+        audio_api: str = r"http://47.121.115.252:8193/voiceModel/chat"
+        uuid = static.uuid
+        user_name = static.username
+        print(user_name, uuid)
+        if uuid == 0 or user_name == '未登录':
+            # print("!")
+            InfoBar.error(
+                title="音转文",
+                content="请先登录",
+                orient=Qt.Vertical,
+                isClosable=True,
+                position=InfoBarPosition.BOTTOM_RIGHT,
+                duration=1000,
+                parent=self
+            )
+        else:
+            for i in range(2):
+                try:
+                    # print(path)
+                    r = requests.post(url=audio_api,
+                                      headers={
+                                          "uuid": uuid,
+                                          "username": user_name,
+                                      },
+                                      files={
+                                          "file": open(path, "rb")
+                                      })
+                    print("r.status_code", r.status_code)
+                    # print(requests.json())
+                    if r.status_code == 200:
+                        response_data = r.json()
+                        code = response_data.get("code", None)
+                        text = response_data.get("content", None)
+                        if code != 0:
+                            InfoBar.error(
+                                title="音转文",
+                                content="识别失败",
+                                orient=Qt.Vertical,
+                                isClosable=True,
+                                position=InfoBarPosition.BOTTOM_RIGHT,
+                                duration=1000,
+                                parent=self
+                            )
+                        else:
+                            ai_avatar_path = '../Assets/image/logo.png'
+                            is_sender = False
+                            bubble = MessageBubble(text, ai_avatar_path, is_sender=is_sender, variety="text")
+                            # 创建一个 QListWidgetItem 并设置其大小提示
+                            item = QListWidgetItem(self.ListWidget)
+                            item.setSizeHint(bubble.sizeHint())
+                            # 将 MessageBubble 设置为 QListWidgetItem 的 widget
+                            self.ListWidget.setItemWidget(item, bubble)
+                            print(text)
+                        break  # 如果成功，跳出循环
+                    else:
+                        InfoBar.error(
+                            title="音转文",
                             content=f"网络异常 {r.status_code}",
                             orient=Qt.Vertical,
                             isClosable=True,
