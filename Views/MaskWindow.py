@@ -146,9 +146,9 @@ class MaskSettingWindow(QWidget):
                 'des': '',
                 'signal': 'add'
             }
-            self.add_mask_list(data)
+            self.add_or_delete_mask_list(data)
 
-        global_signal.mask_submitted.connect(self.add_mask_list)
+        global_signal.mask_submitted.connect(self.add_or_delete_mask_list)
 
         # global_signal.ChatOperation.connect(self.test)
         # =============================================每行mask设置end=============================================
@@ -205,12 +205,12 @@ class MaskSettingWindow(QWidget):
         """
         global_signal.ChatOperation_Mask.emit("start_chat")
 
-    def add_mask_list(self, data):
+    def add_or_delete_mask_list(self, data):
         signal = data.get('signal')
+        name = data.get('name')
+        icon = data.get('icon')
+        des = data.get('des')
         if signal == 'add':
-            name = data.get('name')
-            icon = data.get('icon')
-            des = data.get('des')
             # print(name, icon, des)
             # 更新本地数据库
             self.sql.add_mask(name, des, icon)
@@ -228,7 +228,13 @@ class MaskSettingWindow(QWidget):
             self.mask_info.setItemWidget(item, custom_widget)
         else:
             print('delete')
-            self.sql.delete_mask(self.mask_name)
+            item = self.mask_info.currentItem()
+            if item:
+                # print(item)
+                row = self.mask_info.row(item)
+                # print(row)
+                self.mask_info.takeItem(row)
+            self.sql.delete_mask(name)
 
 
 if __name__ == "__main__":
