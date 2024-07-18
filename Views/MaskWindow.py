@@ -13,6 +13,7 @@ from qfluentwidgets import PushButton, ToolTipFilter, ToolTipPosition, MessageBo
     LineEdit, PlainTextEdit, ListWidget, SearchLineEdit, MessageBox
 from qfluentwidgets import FluentIcon
 from Views.GlobalSignal import global_signal
+from Sqlite.ChatSql import ChatSql
 
 
 class MaskSubSettingWindow(MessageBoxBase):
@@ -50,7 +51,8 @@ class MaskSubSettingWindow(MessageBoxBase):
         mask_des = self.mask_des_input.toPlainText()
         data = {
             'name': mask_name,
-            'icon': icon
+            'icon': icon,
+            'des': mask_des
         }
         print(data)
         # 发射全局信号
@@ -118,10 +120,14 @@ class MaskSettingWindow(QWidget):
         # =============================================每行mask设置begin=============================================
         self.data_and_icons = [("机器学习", FluentIcon.ROBOT), ("英语写作", FluentIcon.CHAT),
                                ("小红书写手", FluentIcon.BOOK_SHELF), ("数学物理", FluentIcon.CALENDAR)]
+        # 更新本地数据库
+        self.sql = ChatSql()
+
         for text, icon_name in self.data_and_icons:
             data = {
                 'name': text,
-                'icon': icon_name
+                'icon': icon_name,
+                'des': ''
             }
             self.add_mask_list(data)
 
@@ -183,6 +189,12 @@ class MaskSettingWindow(QWidget):
     def add_mask_list(self, data):
         name = data.get('name')
         icon = data.get('icon')
+        des = data.get('des')
+        print(name, icon, des)
+        # 更新本地数据库
+        # self.sql.add_mask(name, des, icon)
+        # 发送全局信号
+        global_signal.ChatOperation.emit("close_login_success")
         item = QListWidgetItem(self.mask_info)
         # self.data_and_icons.append((name,icon))
         # 创建CustomWidget实例，这里我们传递文本和一个模拟的图标名（实际实现可能需要调整）
