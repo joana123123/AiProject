@@ -375,7 +375,6 @@ class ChatSessionWindow(QWidget):
         global_signal.audio_submitted.connect(self.send_audio_message)
         AudioChoiceWindow(self).exec()
 
-
     def send_audio_message(self, audio_path: str) -> None:
         print("send_audio")
         print(audio_path)
@@ -391,7 +390,6 @@ class ChatSessionWindow(QWidget):
         self.ListWidget.scrollToBottom()
         # 语音转文字函数
         self.audio_text(audio_path)
-
 
     def img_text(self, path: str):
         """
